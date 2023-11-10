@@ -1,21 +1,29 @@
-import { FC, useState } from "react";
-import { getNodes, nodes, Node, changeCheck } from "./util";
+import { FC } from "react";
+import useCheckboxTree, { getNodes, nodes, ProductNode } from "./util";
 import { Checkbox } from "./checkbox";
 
 export const Tree = () => {
-  const [items, setItems] = useState(getNodes(nodes));
-  const handleSelect = (id: number, status: boolean | "indeterminate") => {
-    setItems([...changeCheck(items, id, status)]);
-  };
+  const [items, setItems, searchTerm, setSearchTerm, toggleCollapsed] =
+    useCheckboxTree(getNodes(nodes));
 
   // TODO: filter items before render
   // filterItemsBeforeRender
 
   return (
     <div>
+      <input
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       <ul>
         {items.map((node) => (
-          <TreeItem onCheck={handleSelect} key={node.id} node={node} />
+          <TreeItem
+            isSearching={!!searchTerm}
+            onCheck={setItems}
+            key={node.id}
+            node={node}
+            onCollapse={toggleCollapsed}
+          />
         ))}
       </ul>
     </div>
@@ -23,33 +31,16 @@ export const Tree = () => {
 };
 
 const TreeItem: FC<{
-  node: Node;
+  node: ProductNode;
+  isSearching: boolean;
   onCheck: (id: number, value: boolean | "indeterminate") => void;
-}> = ({ node, onCheck }) => {
-  const isBranch = node.children.length > 0;
-
+  onCollapse: (id: number) => void;
+}> = ({ node, onCheck, onCollapse, isSearching }) => {
   const handleSelect = () => {
-    console.log(node.id, node.checked);
-    if (!isBranch) {
-      onCheck(node.id, !node.checked);
-      return;
-    }
-
-    if (node.checked === false) {
-      onCheck(node.id, true);
-      return;
-    }
-
-    if (node.checked === true) {
-      onCheck(node.id, "indeterminate");
-      return;
-    }
-
-    if (node.checked === "indeterminate") {
-      onCheck(node.id, false);
-      return;
-    }
+    onCheck(node.id, !node.checked);
   };
+
+  const showBranch = isSearching || !node.collapsed;
 
   return (
     <li>
@@ -59,6 +50,17 @@ const TreeItem: FC<{
           alignItems: "center",
         }}
       >
+        {node.isBranch && (
+          <button
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+            }}
+            onClick={() => onCollapse(node.id)}
+          >
+            +
+          </button>
+        )}
         <Checkbox
           checked={node.checked}
           onCheckedChange={() => {
@@ -67,10 +69,17 @@ const TreeItem: FC<{
         />
         <span>{node.label}</span>
       </div>
-      {isBranch && (
-        <ul>
+
+      {node.isBranch && showBranch && (
+        <ul style={{ paddingLeft: "100px" }}>
           {node.children.map((child) => (
-            <TreeItem key={child.id} onCheck={onCheck} node={child} />
+            <TreeItem
+              onCollapse={onCollapse}
+              key={child.id}
+              onCheck={onCheck}
+              node={child}
+              isSearching={isSearching}
+            />
           ))}
         </ul>
       )}
