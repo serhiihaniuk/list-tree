@@ -66,15 +66,11 @@ const useCheckboxListTree = (initialNodes: CheckboxListNode[]) => {
       searchNodes: CheckboxListNode[],
       id: number
     ): CheckboxListNode | undefined => {
-      for (const node of searchNodes) {
-        if (node.id === id) {
-          return node;
-        }
-        const found = findNode(node.children, id);
-        if (found) {
-          return found;
-        }
-      }
+      return searchNodes.reduce((foundNode, node) => {
+        if (foundNode) return foundNode;
+        if (node.id === id) return node;
+        return findNode(node.children, id);
+      }, undefined as CheckboxListNode | undefined);
     },
     []
   );
@@ -107,16 +103,16 @@ const useCheckboxListTree = (initialNodes: CheckboxListNode[]) => {
 
   const updateTreeCheckStatuses = useCallback(
     (updateNodes: CheckboxListNode[]) => {
-      for (const node of updateNodes) {
+      updateNodes.forEach((node) => {
         if (node.children.length > 0) {
           updateTreeCheckStatuses(node.children);
-          const checkedChildren = node.children.filter(
+          const checkedChildrenCount = node.children.filter(
             (child) => child.checked === true
-          );
-          if (checkedChildren.length === node.children.length) {
+          ).length;
+          if (checkedChildrenCount === node.children.length) {
             node.checked = true;
           } else if (
-            checkedChildren.length > 0 ||
+            checkedChildrenCount > 0 ||
             node.children.some((child) => child.checked === "indeterminate")
           ) {
             node.checked = "indeterminate";
@@ -124,7 +120,7 @@ const useCheckboxListTree = (initialNodes: CheckboxListNode[]) => {
             node.checked = false;
           }
         }
-      }
+      });
     },
     []
   );
