@@ -1,10 +1,10 @@
 import { FC } from "react";
-import useCheckboxTree, { getNodes, nodes, ProductNode } from "./util";
+import useCheckboxListTree, { getNodes, nodes, CheckboxListNode } from "./util";
 import { Checkbox } from "./checkbox";
 
 export const Tree = () => {
   const [items, setItems, searchTerm, setSearchTerm, toggleCollapsed] =
-    useCheckboxTree(getNodes(nodes));
+    useCheckboxListTree(getNodes(nodes));
 
   return (
     <div>
@@ -28,7 +28,7 @@ export const Tree = () => {
 };
 
 const TreeItem: FC<{
-  node: ProductNode;
+  node: CheckboxListNode;
   isSearching: boolean;
   onCheck: (id: number, value: boolean | "indeterminate") => void;
   onCollapse: (id: number, state: boolean) => void;
