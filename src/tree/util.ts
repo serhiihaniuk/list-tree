@@ -51,13 +51,14 @@ const useCheckboxTree = (initialNodes: ProductNode[]) => {
   );
 
   const toggleCollapse = useCallback(
-    (id: number) => {
+    (id: number, state: boolean) => {
       setNodes((prevNodes) => {
         const newNodes = [...prevNodes];
         const node = findNode(newNodes, id);
         if (node) {
-          console.log(node);
-          node.collapsed = !node.collapsed; // Toggle the collapsed state
+          console.log(node.collapsed);
+          node.collapsed = state;
+          console.log(node.collapsed);
         }
         return newNodes;
       });

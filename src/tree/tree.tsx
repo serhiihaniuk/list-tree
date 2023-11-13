@@ -6,9 +6,6 @@ export const Tree = () => {
   const [items, setItems, searchTerm, setSearchTerm, toggleCollapsed] =
     useCheckboxTree(getNodes(nodes));
 
-  // TODO: filter items before render
-  // filterItemsBeforeRender
-
   return (
     <div>
       <input
@@ -34,7 +31,7 @@ const TreeItem: FC<{
   node: ProductNode;
   isSearching: boolean;
   onCheck: (id: number, value: boolean | "indeterminate") => void;
-  onCollapse: (id: number) => void;
+  onCollapse: (id: number, state: boolean) => void;
 }> = ({ node, onCheck, onCollapse, isSearching }) => {
   const handleSelect = () => {
     onCheck(node.id, !node.checked);
@@ -56,18 +53,19 @@ const TreeItem: FC<{
               backgroundColor: "transparent",
               border: "none",
             }}
-            onClick={() => onCollapse(node.id)}
+            onClick={() => onCollapse(node.id, !node.collapsed)}
           >
             +
           </button>
         )}
         <Checkbox
-          checked={node.checked}
+          value={node.checked}
           onCheckedChange={() => {
             handleSelect();
           }}
+          label={node.label}
+          id={node.id.toString()}
         />
-        <span>{node.label}</span>
       </div>
 
       {node.isBranch && showBranch && (
